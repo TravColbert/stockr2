@@ -138,7 +138,9 @@ module.exports = function(app,model) {
     gets : function(req,res,next) {
       let myName = "gets";
       let searchObj = {
-        domainId : req.session.user.currentDomain.id
+        where: {
+          domainId: req.session.user.currentDomain.id
+        }
       }
       app.tools.checkAuthorization(["list","all"],req.session.user.id,req.session.user.currentDomain.id)
       .then(response => {
