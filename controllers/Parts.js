@@ -30,7 +30,7 @@ module.exports = function(app,model) {
       let myName = "countUsed";
       return new Promise((resolve,reject) => {
         app.log("Counting consumed parts of ID: " + partId,myName,6);
-        app.controllers[model].__get({ id:partId })
+        app.controllers[model].__get({where:{ id:partId }})
         .then(parts => {
           return parts[0].getCases();
         })
@@ -48,7 +48,7 @@ module.exports = function(app,model) {
       return new Promise((resolve,reject) => {
         let maxParts;
         app.log("Counting free parts of ID: " + partId,myName,6);
-        app.controllers[model].__get({ id:partId })
+        app.controllers[model].__get({where:{ id:partId }})
         .then(parts => {
           maxParts = parts[0].maxcount;
           return parts[0].getCases();
@@ -56,7 +56,7 @@ module.exports = function(app,model) {
         .then(cases => {
           app.log("Number of consumed parts of ID: " + partId + " is: " + cases.length,myName,6);
           app.log("NUmber of free parts for part ID: " + partId + " is: " + (maxParts-cases.length),myName,6);
-          resolve(maxParts-cases.length);
+          return (maxParts-cases.length);
         })
         .catch(err => {
           reject(new Error("(" + myName + "): " + err.message));
@@ -66,7 +66,7 @@ module.exports = function(app,model) {
     getCases : function(partId) {
       let myName = "getCases";
       app.log("Getting cases for part ID: " + partId,myName,6);
-      app.controllers[model].__get({ id:partId })
+      app.controllers[model].__get({where:{ id:partId }})
       .then(parts => {
         return parts[0].getCases();
       })
@@ -84,7 +84,9 @@ module.exports = function(app,model) {
         if(!partId) reject(new Error("No part ID given"));
         if(!caseId) reject(new Error("No case ID given"));
         let searchObj = {
-          id : partId
+          where: {
+            id : partId
+          }
         }
         let partItem;
         let caseItem;
@@ -152,6 +154,7 @@ module.exports = function(app,model) {
         return app.controllers[model].__get(searchObj);
       })
       .then(items => {
+        app.log(items,myName,6);
         req.appData.parts = items;
         req.appData.view = "parts";
         return next();
@@ -182,6 +185,19 @@ module.exports = function(app,model) {
       .catch(err => {
         return res.send("Err: " + err.message);
       });
+    },
+    getConsumed : function(req,res,next) {
+      let myName = "getConsumed";
+      let partId = req.params.id;
+      app.log("Finding consumed parts for part id: " + partId,myName,6);
+      app.controllers[model].countConsumed(partId)
+      .then(consumed => {
+        app.log("Consumed: " + consumed,myName,6);
+        return res.json(consumed);
+      })
+      .catch(err => {
+        return res.send(err.message);
+      })
     },
     update : function(req,res,next) {
       let myName = "editPart";

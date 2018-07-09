@@ -6,18 +6,23 @@ module.exports = function(app) {
      */
     let myName = "parts module startup";
     let demoPart = {
-      partnum : "12345.678",
+      partNum : "12345.678",
       make : "Acme",
       description : "pre-loaded giant spring",
       notes : "to be used on unsuspecting road-runners",
       cost : 100.99,
       price : 999.99,
       location : "Desert Warehouse, shelf 2",
-      mincount : 1,
-      maxcount : 3,
-      inwarranty : true
+      minCount : 1,
+      maxCount : 3,
+      inWarranty : true
     }
-    app.controllers["parts"].__get({where:{partnum:demoPart.partnum}})
+    let demoCase = {
+      name : "STOCKR_DEMO_CASE.1",
+      description: "This is a demo case",
+      notes: "This is not a real case. It is meant to demonstrate the manipulation of cases in Stockr"
+    }
+    app.controllers["parts"].__get({where:{partNum:demoPart.partNum}})
     .then(parts => {
       if(parts.length>0) return true;
       app.log("Pre-populating the parts table...",myName,6);
@@ -33,6 +38,21 @@ module.exports = function(app) {
       demoPart.domainId = domains[0].id;
       demoPart.userId = domains[0].ownerId;
       return app.controllers["parts"].__create(demoPart);
+    })
+    .then(part => {
+      app.log("Newly-created demo part: " + part.partNum);
+      demoCase.domainId = 1;
+      demoCase.userId = 1;
+      app.log("Adding new demo case: " + demoCase);
+      app.controllers["cases"].__create(demoCase)
+      .then((demoCase) => {
+        app.log("This is the demo case: " + demoCase.name,myName,6);
+        return part.addCase(demoCase);
+      })
+      .catch(err => {
+        return new Error("(" + myName + "): " + err.message);
+      });
+      // return part;
     })
     .catch(err => {
       app.log("Something went wrong pre-populating table: " + err.message,myName,3,"!!!");
