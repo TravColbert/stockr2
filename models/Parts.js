@@ -2,7 +2,7 @@ module.exports = function(Sequelize,app) {
   return {
     tablename:"parts",
     schema:{
-      "partnum":{
+      "partNum":{
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -28,16 +28,16 @@ module.exports = function(Sequelize,app) {
         type: Sequelize.STRING,
         allowNull: true
       },
-      "mincount":{
+      "minCount":{
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
-      "maxcount":{
+      "maxCount":{
         type: Sequelize.INTEGER
       },
-      "inwarranty":{
+      "inWarranty":{
         type: Sequelize.BOOLEAN
-      },
+      }
     }
   }
 }
